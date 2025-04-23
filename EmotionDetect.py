@@ -1,4 +1,3 @@
-
 import requests
 import json
 def emotion_detector(text_to_analyse):
@@ -7,10 +6,13 @@ def emotion_detector(text_to_analyse):
     data = { "raw_document": { "text": text_to_analyse } }
     response = requests.post(url, headers=headers, data=json.dumps(data))
     if response.status_code == 200:
-        return response.json()
+       result = json.loads(response.text)
+       emotions = result['emotionPredictions'][0]['emotion']
+       dominant_emotion = max(emotions, key=emotions.get)
+       emotions['dominant_emotion'] = dominant_emotion 
+       return emotions  # Converti la risposta in dizionario
     else:
-        return f"Error: {response.status_code}, {response.text}"
-
-text_to_analyze = "I love this new technology."
-emotion_response = emotion_detector(text_to_analyze)
-print(f"Emotion analysis result: {emotion_response}")
+        return {
+            "error": f"Error: {response.status_code}",
+            "details": response.text
+        }
